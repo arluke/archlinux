@@ -1,0 +1,31 @@
+### Device freezes in Xbox Joystick (XInput) mode
+Some Azeron devices lock up when using an XInput (Xbox) profile becuase of unhandled reports. This fills the buffer and 
+blocks the firmware, making the whole device unresponsive. Current solution is to plug into a Windows machine and change
+the joystick to a non-XInput mode.
+
+### Create udev rules
+`/etc/udev/rules.d/99-azeron.rules`
+```
+# Azeron Keypad udev rules
+# Allows non-root access to Azeron HID devices
+# Install to /etc/udev/rules.d/99-azeron.rules
+# Then reload: sudo udevadm control --reload-rules && sudo udevadm trigger
+
+# Azeron keypads - HID interface (vendorId 0x16D0 = 5840)
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="16d0", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="16d0", MODE="0666"
+
+# Register Azeron with xpad for XInput gamepad support
+# When the device is in Xbox Joystick (XInput) mode, xpad binds to Interface 0,
+# drains the endpoint (preventing firmware lockup), and creates /dev/input/js*
+# devices that games and Steam Input can see.
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="12f7", TEST=="/sys/bus/usb/drivers/xpad/new_id", RUN+="/bin/sh -c 'echo 16d0 12f7 > /sys/bus/usb/drivers/xpad/new_id || true'"
+
+# STM32 DFU bootloader (used during firmware updates)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE="0666"
+```
+Reload rules (or preferably, reboot)
+```
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
