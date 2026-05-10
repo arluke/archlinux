@@ -1,9 +1,4 @@
-### Device freezes in Xbox Joystick (XInput) mode
-Some Azeron devices lock up when using an XInput (Xbox) profile becuase of unhandled reports. This fills the buffer and 
-blocks the firmware, making the whole device unresponsive. Current solution is to plug into a Windows machine and change
-the joystick to a non-XInput mode.
-
-### Create udev rules
+### udev rules
 `/etc/udev/rules.d/99-azeron.rules`
 ```
 # Azeron Keypad udev rules
@@ -28,4 +23,18 @@ Reload rules (or preferably, reboot)
 ```
 sudo udevadm control --reload-rules
 sudo udevadm trigger
+```
+# Issues
+### Device freezes in Xbox Joystick (XInput) mode
+Some Azeron devices lock up when using an XInput (Xbox) profile becuase of unhandled reports. This fills the buffer and 
+blocks the firmware, making the whole device unresponsive. Current solution is to plug into a Windows machine and change
+the joystick to a non-XInput mode.
+
+### Phantom right stick
+Make sure modules have been loaded:
+
+`/etc/modules-load.d/90-azeron.conf`
+```
+usbhid
+joydev
 ```
